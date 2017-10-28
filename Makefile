@@ -6,12 +6,12 @@ bin:
 clean:
 	rm -rf bin
 
-build: bin/tlb
+build: clean bin/tlb
 
 bin/tlb: bin
 	go build -o bin/tlb ./cmd/tlb
 
-run: bin/tlb
+run: build
 	bin/tlb
 
 .PHONY: all
