@@ -25,7 +25,7 @@ func StartServer(port string) {
 
 // StartServers starts up a bunch of servers listening given ports
 func StartServers(ports []string) {
-	http.HandleFunc("/sleep", sleepHandler)
+	http.HandleFunc("/", sleepHandler)
 
 	for _, port := range ports {
 		go StartServer(port)
@@ -33,18 +33,20 @@ func StartServers(ports []string) {
 }
 
 type sleepRequest struct {
-	duration time.Duration `json:"duration"`
+	Seconds int `json:"seconds"`
 }
 
 // sleepHandler simulates a route that does work by sleeping
 func sleepHandler(w http.ResponseWriter, r *http.Request) {
-	var req *sleepRequest
+	var req sleepRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "unexpected request format", http.StatusUnprocessableEntity)
+		return
 	}
+	defer r.Body.Close()
 
 	select {
-	case <-time.After(req.duration):
+	case <-time.After(time.Duration(req.Seconds) * time.Second):
 	case <-time.After(defaultSleep):
 	}
 

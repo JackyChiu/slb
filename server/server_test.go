@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"testing"
-	"time"
 )
 
 func TestStartServers_Default(t *testing.T) {
 	var sleepReq = sleepRequest{
-		duration: 10 * time.Millisecond,
+		Seconds: 1,
 	}
 
 	StartServers(DEFAULT_PORTS)
