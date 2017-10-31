@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 )
 
 type Balancer struct {
@@ -15,11 +14,11 @@ type Balancer struct {
 func NewBalancer() *Balancer {
 	b := &Balancer{
 		pool: newPool([]string{
-			"http://localhost:9000",
-			"http://localhost:9001",
-			"http://localhost:9002",
-			"http://localhost:9003",
-			"http://localhost:9004",
+			"localhost:9000",
+			"localhost:9001",
+			"localhost:9002",
+			"localhost:9003",
+			"localhost:9004",
 		}),
 	}
 
@@ -35,13 +34,13 @@ func (b *Balancer) Director(r *http.Request) {
 	//worker := b.pool.Pop().(*worker)
 	//worker.pending += 1
 	worker := b.pool[0]
-	// TODO: halp, how do I do this cleanly
-	// Read: https://golang.org/src/net/http/httputil/reverseproxy.go#L61
-	u, _ := url.Parse(worker.host)
-	r.URL = u
+	r.URL.Scheme = "http"
+	r.URL.Host = worker.host
 }
 
 func (b *Balancer) ModifyResponse(res *http.Response) error {
-	log.Printf("%+v", res)
+	log.Printf("response %+v", res)
+	// TODO I know what server from this?
+	log.Printf("host from res %s", res.Request.URL.Host)
 	return nil
 }
