@@ -1,14 +1,17 @@
 package balance
 
 import (
+	"container/heap"
 	"log"
 	"net/http"
 	"net/http/httputil"
+
+	"github.com/pkg/errors"
 )
 
 type Balancer struct {
 	*httputil.ReverseProxy
-	pool pool
+	pool *pool
 }
 
 func NewBalancer() *Balancer {
@@ -31,16 +34,22 @@ func NewBalancer() *Balancer {
 }
 
 func (b *Balancer) Director(r *http.Request) {
-	//worker := b.pool.Pop().(*worker)
-	//worker.pending += 1
-	worker := b.pool[0]
+	server := b.pool.Pop().(*server)
+	server.pending += 1
+
 	r.URL.Scheme = "http"
-	r.URL.Host = worker.host
+	r.URL.Host = server.host
+
+	b.pool.Push(server)
 }
 
 func (b *Balancer) ModifyResponse(res *http.Response) error {
-	log.Printf("response %+v", res)
-	// TODO I know what server from this?
-	log.Printf("host from res %s", res.Request.URL.Host)
+	log.Printf("host f;om res %s", res.Request.URL.Host)
+	server, err := b.pool.Server(res.Request.URL.Host)
+	if err != nil {
+		return errors.Wrap(err, "couldn't update pool")
+	}
+	server.pending -= 1
+	heap.Fix(b.pool, server.index)
 	return nil
 }

@@ -1,31 +1,44 @@
 package balance
 
-import "container/heap"
+import (
+	"container/heap"
+	"fmt"
+	"log"
+)
 
-type worker struct {
+type server struct {
 	host    string
 	index   int
 	pending int
 }
 
-func newWorker(url string, index int) *worker {
-	return &worker{
+func newServer(url string, index int) *server {
+	return &server{
 		host:    url,
 		pending: 0,
 		index:   index,
 	}
 }
 
-type pool []*worker
+type pool []*server
 
-func newPool(urls []string) pool {
-	var pool pool
+func newPool(urls []string) *pool {
+	pool := new(pool)
 	for i, url := range urls {
-		worker := newWorker(url, i)
-		pool = append(pool, worker)
+		pool.Push(newServer(url, i))
 	}
 	heap.Init(pool)
 	return pool
+}
+
+func (p pool) Server(host string) (*server, error) {
+	for _, server := range p {
+		log.Println(server.host)
+		if server.host == host {
+			return server, nil
+		}
+	}
+	return nil, fmt.Errorf("coudln't find server with host: %s", host)
 }
 
 func (p pool) Len() int {
@@ -42,12 +55,16 @@ func (p pool) Swap(i, j int) {
 	p[j].index = i
 }
 
-func (p pool) Push(x interface{}) {
-	w := x.(*worker)
-	w.index = p.Len()
-	p = append(p, w)
+func (p *pool) Push(x interface{}) {
+	server := x.(*server)
+	server.index = p.Len()
+	*p = append(*p, server)
 }
 
-func (p pool) Pop() interface{} {
-	return p[0]
+func (p *pool) Pop() interface{} {
+	pool := *p
+	last := len(pool) - 1
+	elem := pool[last]
+	*p = pool[:last]
+	return elem
 }
