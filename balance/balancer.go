@@ -10,7 +10,7 @@ import (
 
 type Balancer struct {
 	*httputil.ReverseProxy
-	pool *pool
+	pool pool
 }
 
 func NewBalancer() *Balancer {
@@ -48,6 +48,6 @@ func (b *Balancer) ModifyResponse(res *http.Response) error {
 		return errors.Wrap(err, "couldn't update pool")
 	}
 	server.pending -= 1
-	heap.Fix(b.pool, server.index)
+	heap.Fix(&b.pool, server.index)
 	return nil
 }

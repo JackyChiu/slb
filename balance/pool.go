@@ -21,12 +21,12 @@ func newServer(url string, index int) *server {
 
 type pool []*server
 
-func newPool(urls []string) *pool {
-	pool := new(pool)
+func newPool(urls []string) pool {
+	pool := make(pool, len(urls))
 	for i, url := range urls {
-		pool.Push(newServer(url, i))
+		pool[i] = newServer(url, i)
 	}
-	heap.Init(pool)
+	heap.Init(&pool)
 	return pool
 }
 
@@ -61,7 +61,7 @@ func (p *pool) Push(x interface{}) {
 
 func (p *pool) Pop() interface{} {
 	pool := *p
-	last := len(pool) - 1
+	last := pool.Len() - 1
 	elem := pool[last]
 	*p = pool[:last]
 	return elem
