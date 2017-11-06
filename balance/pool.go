@@ -3,7 +3,6 @@ package balance
 import (
 	"container/heap"
 	"fmt"
-	"log"
 )
 
 type server struct {
@@ -33,7 +32,6 @@ func newPool(urls []string) *pool {
 
 func (p pool) Server(host string) (*server, error) {
 	for _, server := range p {
-		log.Println(server.host)
 		if server.host == host {
 			return server, nil
 		}

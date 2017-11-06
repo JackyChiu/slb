@@ -14,4 +14,7 @@ bin/tlb: bin
 run: build
 	bin/tlb
 
+test:
+	go test -v -race ./...
+
 .PHONY: all

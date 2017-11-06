@@ -2,7 +2,6 @@ package balance
 
 import (
 	"container/heap"
-	"log"
 	"net/http"
 	"net/http/httputil"
 
@@ -44,7 +43,6 @@ func (b *Balancer) Director(r *http.Request) {
 }
 
 func (b *Balancer) ModifyResponse(res *http.Response) error {
-	log.Printf("host f;om res %s", res.Request.URL.Host)
 	server, err := b.pool.Server(res.Request.URL.Host)
 	if err != nil {
 		return errors.Wrap(err, "couldn't update pool")
