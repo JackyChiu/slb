@@ -22,6 +22,6 @@ example: bin/example
 	bin/example
 
 test:
-	go test -v -race ./...
+	go test ./...
 
 .PHONY: all

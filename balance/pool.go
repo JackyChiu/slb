@@ -44,13 +44,13 @@ func (p pool) Len() int {
 }
 
 func (p pool) Less(i, j int) bool {
-	return p[i].pending < p[j].pending
+	return p[i].pending > p[j].pending
 }
 
 func (p pool) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
-	p[i].index = j
-	p[j].index = i
+	p[i].index = i
+	p[j].index = j
 }
 
 func (p *pool) Push(x interface{}) {
@@ -61,7 +61,7 @@ func (p *pool) Push(x interface{}) {
 
 func (p *pool) Pop() interface{} {
 	pool := *p
-	last := pool.Len() - 1
+	last := p.Len() - 1
 	elem := pool[last]
 	*p = pool[:last]
 	return elem
