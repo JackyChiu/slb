@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"bytes"
@@ -12,9 +12,9 @@ func TestStartServers_Default(t *testing.T) {
 		Seconds: 1,
 	}
 
-	StartServers(DEFAULT_PORTS)
+	StartServers(DefaultPorts)
 
-	for _, port := range DEFAULT_PORTS {
+	for _, port := range DefaultPorts {
 		t.Run("testing "+port, func(t *testing.T) {
 			t.Parallel()
 			var buf bytes.Buffer

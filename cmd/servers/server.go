@@ -1,22 +1,35 @@
-package server
+package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"sync"
 	"time"
 )
 
-var (
-	// DEFAULT_PORTS are the default ports to listen too when starting new servers
-	DEFAULT_PORTS = []string{
+func main() {
+	http.HandleFunc("/", sleepHandler)
+	ports := []string{
 		":9000",
 		":9001",
 		":9002",
 		":9003",
-		":9004",
 	}
-	defaultSleep = 25 * time.Second
-)
+
+	var wg sync.WaitGroup
+	for _, port := range ports {
+		port := port
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			StartServer(port)
+		}()
+	}
+
+	wg.Wait()
+}
 
 // StartServer starts up a indiviual server running on specified port
 func StartServer(port string) {
@@ -25,12 +38,11 @@ func StartServer(port string) {
 
 // StartServers starts up a bunch of servers listening given ports
 func StartServers(ports []string) {
-	http.HandleFunc("/", sleepHandler)
-
-	for _, port := range ports {
-		go StartServer(port)
-	}
 }
+
+var (
+	defaultSleep = 25 * time.Second
+)
 
 type sleepRequest struct {
 	Seconds int `json:"seconds"`
@@ -45,6 +57,7 @@ func sleepHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	log.Printf("%v recieved a request to sleep for %v seconds", r.Host, req.Seconds)
 	select {
 	case <-time.After(time.Duration(req.Seconds) * time.Second):
 	case <-time.After(defaultSleep):

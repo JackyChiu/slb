@@ -13,15 +13,9 @@ type Balancer struct {
 	pool pool
 }
 
-func NewBalancer() *Balancer {
+func NewBalancer(hosts []string) *Balancer {
 	b := &Balancer{
-		pool: newPool([]string{
-			"localhost:9000",
-			"localhost:9001",
-			"localhost:9002",
-			"localhost:9003",
-			"localhost:9004",
-		}),
+		pool: newPool(hosts),
 	}
 
 	b.ReverseProxy = &httputil.ReverseProxy{
