@@ -2,7 +2,8 @@ package balance
 
 import (
 	"container/heap"
-	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 type server struct {
@@ -36,7 +37,7 @@ func (p pool) Server(host string) (*server, error) {
 			return server, nil
 		}
 	}
-	return nil, fmt.Errorf("coudln't find server with host: %s", host)
+	return nil, errors.Errorf("coudln't find server with host: %s", host)
 }
 
 func (p pool) Len() int {
