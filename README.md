@@ -1,2 +1,1 @@
-# tlb
-Trivial Load Balancer
+# Simple Load Balancer (slb)

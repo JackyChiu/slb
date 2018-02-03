@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/JackyChiu/tlb"
-	"github.com/JackyChiu/tlb/balance"
+	"github.com/JackyChiu/slb"
 )
 
 func main() {
@@ -15,8 +14,8 @@ func main() {
 	)
 	flag.Parse()
 
-	config := tlb.MustParseConfig(*configPath)
+	config := slb.MustParseConfig(*configPath)
 	port := fmt.Sprintf(":%v", config.Port)
 
-	http.ListenAndServe(port, balance.NewBalancer(config.Hosts))
+	http.ListenAndServe(port, slb.NewBalancer(config.Hosts))
 }

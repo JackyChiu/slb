@@ -1,15 +1,14 @@
 package main
 
 import (
-	"bytes"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func main() {
-	var buf bytes.Buffer
-	buf.WriteString(`{ "seconds": 3 }`)
-	res, err := http.Post("http://localhost:8000", "application/json", &buf)
+	body := strings.NewReader(`{ "seconds": 3 }`)
+	res, err := http.Post("http://localhost:8000", "application/json", body)
 	if err != nil {
 		log.Fatalf("req failed: %v", err)
 	}

@@ -1,4 +1,4 @@
-package balance
+package slb
 
 import (
 	"container/heap"
