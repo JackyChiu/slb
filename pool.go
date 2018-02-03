@@ -2,6 +2,9 @@ package slb
 
 import (
 	"container/heap"
+	"fmt"
+	"math"
+	"strconv"
 
 	"github.com/pkg/errors"
 )
@@ -66,4 +69,31 @@ func (p *pool) Pop() interface{} {
 	elem := pool[last]
 	*p = pool[:last]
 	return elem
+}
+
+// stats returns the mean and stdDev values of the pool
+func (p pool) stats() (mean float64, stdDev float64) {
+	length := float64(len(p))
+
+	for _, server := range p {
+		mean += float64(server.pending)
+	}
+	mean /= length
+
+	for _, server := range p {
+		stdDev += math.Pow((float64(server.pending) - mean), 2)
+	}
+	stdDev = math.Sqrt((1 / length) * stdDev)
+
+	return mean, stdDev
+}
+
+func (p pool) String() string {
+	var servers string
+	for _, server := range p {
+		servers += strconv.Itoa(server.pending) + " "
+	}
+
+	mean, stdDev := p.stats()
+	return fmt.Sprintf("Servers: %v| Avg Load: %.2f | Std Dev: %.2f", servers, mean, stdDev)
 }

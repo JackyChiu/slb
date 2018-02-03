@@ -2,20 +2,34 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"flag"
 	"log"
+	"net"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/JackyChiu/slb"
 )
 
 func main() {
-	http.HandleFunc("/", sleepHandler)
-	ports := []string{
-		":9000",
-		":9001",
-		":9002",
-		":9003",
+	var (
+		configPath = flag.String("c", "", "path to config file")
+	)
+	flag.Parse()
+
+	config := slb.MustParseConfig(*configPath)
+	var ports []string
+	for _, host := range config.Hosts {
+		_, port, err := net.SplitHostPort(host)
+		if err != nil {
+			panic(errors.New("server only runs on localhost through ports"))
+		}
+		ports = append(ports, ":"+port)
 	}
+
+	http.HandleFunc("/", sleepHandler)
 
 	var wg sync.WaitGroup
 	for _, port := range ports {
@@ -24,6 +38,7 @@ func main() {
 
 		go func() {
 			defer wg.Done()
+			log.Printf("Starting up server on %v", port)
 			StartServer(port)
 		}()
 	}
@@ -34,10 +49,6 @@ func main() {
 // StartServer starts up a indiviual server running on specified port
 func StartServer(port string) {
 	http.ListenAndServe(port, nil)
-}
-
-// StartServers starts up a bunch of servers listening given ports
-func StartServers(ports []string) {
 }
 
 var (
@@ -57,7 +68,7 @@ func sleepHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	log.Printf("%v recieved a request to sleep for %v seconds", r.Host, req.Seconds)
+	log.Printf("%v recieved a request to sleep for %v seconds", r.URL.Host, req.Seconds)
 	select {
 	case <-time.After(time.Duration(req.Seconds) * time.Second):
 	case <-time.After(defaultSleep):

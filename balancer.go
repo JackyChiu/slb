@@ -2,6 +2,7 @@ package slb
 
 import (
 	"container/heap"
+	"log"
 	"net/http"
 	"net/http/httputil"
 
@@ -28,12 +29,14 @@ func NewBalancer(hosts []string) *Balancer {
 
 func (b *Balancer) Director(r *http.Request) {
 	server := b.pool.Pop().(*server)
+	log.Printf("serving to %v", server.host)
 	server.pending += 1
 
 	r.URL.Scheme = "http"
 	r.URL.Host = server.host
 
 	b.pool.Push(server)
+	heap.Fix(&b.pool, server.index)
 }
 
 func (b *Balancer) ModifyResponse(res *http.Response) error {

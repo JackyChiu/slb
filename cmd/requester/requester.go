@@ -1,16 +1,44 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func main() {
-	body := strings.NewReader(`{ "seconds": 3 }`)
-	res, err := http.Post("http://localhost:8000", "application/json", body)
-	if err != nil {
-		log.Fatalf("req failed: %v", err)
+	var (
+		host = flag.String("host", "localhost:8000", "address to send requests too")
+	)
+	flag.Parse()
+
+	for {
+		go func() {
+			payload := fmt.Sprintf(`{ "seconds": %v }`, randonDuration())
+			body := strings.NewReader(payload)
+
+			log.Printf("sending request with payload: %v", payload)
+			res, err := http.Post("http://"+*host, "application/json", body)
+
+			badReq := res != nil && res.StatusCode >= 400
+			if err != nil || badReq {
+				log.Fatalf("requests failed, res: %v err: %v", res, err)
+			}
+		}()
+
+		randomPause()
 	}
-	log.Printf("yay it works: %v", res)
+}
+
+func randomPause() {
+	randDuration := time.Duration(rand.Intn(1)) * time.Second
+	time.Sleep(randDuration + 250*time.Millisecond)
+}
+
+func randonDuration() int {
+	return rand.Intn(5) + 1
 }
