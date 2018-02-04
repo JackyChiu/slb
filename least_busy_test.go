@@ -15,9 +15,9 @@ var hosts = []string{
 	"localhost:9004",
 }
 
-func TestPool_newPool(t *testing.T) {
-	testPool := newPool(hosts)
-	expected := pool{
+func TestLeastBusy_newLeastBusy(t *testing.T) {
+	testPool := newLeastBusy(hosts)
+	expected := leastBusy{
 		{host: "localhost:9000", index: 0},
 		{host: "localhost:9001", index: 1},
 		{host: "localhost:9002", index: 2},
@@ -27,15 +27,15 @@ func TestPool_newPool(t *testing.T) {
 	require.Equal(t, expected, testPool)
 }
 
-func TestPool_Len(t *testing.T) {
-	testPool := newPool(hosts)
+func TestLeastBusy_Len(t *testing.T) {
+	testPool := newLeastBusy(hosts)
 	require.Equal(t, len(hosts), testPool.Len())
 }
 
-func TestPool_Swap(t *testing.T) {
-	testPool := newPool(hosts)
+func TestLeastBusy_Swap(t *testing.T) {
+	testPool := newLeastBusy(hosts)
 	testPool.Swap(1, 2)
-	expected := pool{
+	expected := leastBusy{
 		{host: "localhost:9000", index: 0},
 		{host: "localhost:9002", index: 1},
 		{host: "localhost:9001", index: 2},
@@ -45,11 +45,11 @@ func TestPool_Swap(t *testing.T) {
 	require.Equal(t, expected, testPool)
 }
 
-func TestPool_Pop(t *testing.T) {
-	testPool := newPool(hosts)
+func TestLeastBusy_Pop(t *testing.T) {
+	testPool := newLeastBusy(hosts)
 
 	actual := testPool.Pop()
-	expected := &server{
+	expected := &node{
 		host:    "localhost:9004",
 		pending: 0,
 		index:   4,
@@ -60,7 +60,7 @@ func TestPool_Pop(t *testing.T) {
 	heap.Fix(&testPool, 3)
 
 	actual = testPool.Pop()
-	expected = &server{
+	expected = &node{
 		host:    "localhost:9001",
 		pending: 0,
 		index:   3,
@@ -68,16 +68,16 @@ func TestPool_Pop(t *testing.T) {
 	require.Equal(t, expected, actual)
 }
 
-func TestPool_Push(t *testing.T) {
-	testPool := newPool(hosts)
+func TestLeastBusy_Push(t *testing.T) {
+	testPool := newLeastBusy(hosts)
 
-	testPool.Push(&server{
+	testPool.Push(&node{
 		host:    "new_host",
 		pending: 2,
 	})
 	heap.Fix(&testPool, testPool.Len()-1)
 
-	expected := pool{
+	expected := leastBusy{
 		{host: "new_host", index: 0, pending: 2},
 		{host: "localhost:9001", index: 1, pending: 0},
 		{host: "localhost:9000", index: 2, pending: 0},
@@ -86,7 +86,4 @@ func TestPool_Push(t *testing.T) {
 		{host: "localhost:9002", index: 5, pending: 0},
 	}
 	require.Equal(t, expected, testPool)
-}
-
-func TestPool_Server(t *testing.T) {
 }

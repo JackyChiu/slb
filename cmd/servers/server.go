@@ -20,26 +20,20 @@ func main() {
 	flag.Parse()
 
 	config := slb.MustParseConfig(*configPath)
-	var ports []string
-	for _, host := range config.Hosts {
-		_, port, err := net.SplitHostPort(host)
-		if err != nil {
-			panic(errors.New("server only runs on localhost through ports"))
-		}
-		ports = append(ports, ":"+port)
-	}
-
-	http.HandleFunc("/", sleepHandler)
 
 	var wg sync.WaitGroup
-	for _, port := range ports {
-		port := port
+	for _, host := range config.Hosts {
+		host := host
 		wg.Add(1)
-
 		go func() {
 			defer wg.Done()
+			_, port, err := net.SplitHostPort(host)
+			if err != nil {
+				panic(errors.New("server only runs on localhost through ports"))
+			}
+
 			log.Printf("Starting up server on %v", port)
-			StartServer(port)
+			StartServer(host, ":"+port)
 		}()
 	}
 
@@ -47,20 +41,30 @@ func main() {
 }
 
 // StartServer starts up a indiviual server running on specified port
-func StartServer(port string) {
-	http.ListenAndServe(port, nil)
+func StartServer(host, port string) {
+	server := http.Server{
+		Addr: port,
+		Handler: &sleepHandler{
+			host: host,
+		},
+	}
+	log.Fatal(server.ListenAndServe())
 }
 
-var (
-	defaultSleep = 25 * time.Second
+var maxSleep = 25 * time.Second
+
+type (
+	sleepHandler struct {
+		host string
+	}
+
+	sleepRequest struct {
+		Seconds int `json:"seconds"`
+	}
 )
 
-type sleepRequest struct {
-	Seconds int `json:"seconds"`
-}
-
 // sleepHandler simulates a route that does work by sleeping
-func sleepHandler(w http.ResponseWriter, r *http.Request) {
+func (s *sleepHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var req sleepRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "unexpected request format", http.StatusUnprocessableEntity)
@@ -68,10 +72,10 @@ func sleepHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	log.Printf("%v recieved a request to sleep for %v seconds", r.URL.Host, req.Seconds)
+	log.Printf("%v recieved a request to sleep for %v seconds", s.host, req.Seconds)
 	select {
 	case <-time.After(time.Duration(req.Seconds) * time.Second):
-	case <-time.After(defaultSleep):
+	case <-time.After(maxSleep):
 	}
 
 	w.WriteHeader(http.StatusOK)

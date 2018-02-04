@@ -1,22 +1,25 @@
 package slb
 
 import (
-	"container/heap"
 	"log"
 	"net/http"
 	"net/http/httputil"
-
-	"github.com/pkg/errors"
 )
+
+type Pool interface {
+	Node(host string) *node
+	Dispatch() *node
+	Complete()
+}
 
 type Balancer struct {
 	*httputil.ReverseProxy
-	pool pool
+	pool leastBusy
 }
 
 func NewBalancer(hosts []string) *Balancer {
 	b := &Balancer{
-		pool: newPool(hosts),
+		pool: newLeastBusy(hosts),
 	}
 
 	b.ReverseProxy = &httputil.ReverseProxy{
@@ -28,23 +31,14 @@ func NewBalancer(hosts []string) *Balancer {
 }
 
 func (b *Balancer) Director(r *http.Request) {
-	server := b.pool.Pop().(*server)
-	log.Printf("serving to %v", server.host)
-	server.pending += 1
+	node := b.pool.Dispatch()
+	log.Println(b.pool)
 
 	r.URL.Scheme = "http"
-	r.URL.Host = server.host
-
-	b.pool.Push(server)
-	heap.Fix(&b.pool, server.index)
+	r.URL.Host = node.host
 }
 
 func (b *Balancer) ModifyResponse(res *http.Response) error {
-	server, err := b.pool.Server(res.Request.URL.Host)
-	if err != nil {
-		return errors.Wrap(err, "couldn't update pool")
-	}
-	server.pending -= 1
-	heap.Fix(&b.pool, server.index)
+	b.pool.Complete(res.Request.URL.Host)
 	return nil
 }

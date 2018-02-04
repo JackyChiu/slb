@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/JackyChiu/slb"
@@ -17,5 +18,6 @@ func main() {
 	config := slb.MustParseConfig(*configPath)
 	port := fmt.Sprintf(":%v", config.Port)
 
+	log.Printf("balancing from port %v", port)
 	http.ListenAndServe(port, slb.NewBalancer(config.Hosts))
 }
