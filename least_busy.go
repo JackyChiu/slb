@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"container/heap"
 	"fmt"
+	"strings"
 )
 
 type leastBusy nodes
@@ -18,23 +19,24 @@ func newLeastBusy(urls []string) leastBusy {
 }
 
 func (p leastBusy) Dispatch() *node {
-	server := p.Pop().(*node)
-	server.pending += 1
-	p.Push(server)
-	heap.Fix(&p, server.index)
-	return server
+	node := p.Pop().(*node)
+	node.pending += 1
+	p.Push(node)
+	heap.Fix(&p, node.index)
+	return node
 }
 
 func (p leastBusy) Complete(host string) {
-	var node *node
+	var n *node
 	for _, node := range p {
-		if node.host == host {
-			node = node
+		if strings.Compare(node.host, host) == 0 {
+			n = node
+			break
 		}
 	}
 
-	node.pending -= 1
-	heap.Fix(&p, node.index)
+	n.pending -= 1
+	heap.Fix(&p, n.index)
 }
 
 func (p leastBusy) Len() int {

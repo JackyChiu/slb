@@ -12,7 +12,7 @@ import (
 
 func main() {
 	var (
-		host = flag.String("host", "localhost:8000", "address to send requests too")
+		host = flag.String("h", "localhost:8000", "host to send requests too")
 	)
 	flag.Parse()
 
