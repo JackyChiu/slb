@@ -19,9 +19,9 @@ func newLeastBusy(urls []string) leastBusy {
 }
 
 func (p leastBusy) Dispatch() *node {
-	node := p.Pop().(*node)
+	node := heap.Pop(&p).(*node)
 	node.pending += 1
-	p.Push(node)
+	heap.Push(&p, node)
 	heap.Fix(&p, node.index)
 	return node
 }
@@ -44,7 +44,7 @@ func (p leastBusy) Len() int {
 }
 
 func (p leastBusy) Less(i, j int) bool {
-	return p[i].pending > p[j].pending
+	return p[i].pending < p[j].pending
 }
 
 func (p leastBusy) Swap(i, j int) {
@@ -71,7 +71,7 @@ func (p leastBusy) String() string {
 	var output bytes.Buffer
 	output.WriteString("\nHost with pending tasks: \n")
 	for _, node := range p {
-		str := fmt.Sprintf("host: %v\t pending: %v\n", node.host, node.pending)
+		str := fmt.Sprintf("%+v\n", *node)
 		output.WriteString(str)
 	}
 
