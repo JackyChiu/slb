@@ -19,7 +19,7 @@ func TestLeastBusy_Dispatch(t *testing.T) {
 	}
 	heap.Init(&testPool.nodes)
 
-	actual := testPool.Dispatch()
+	actual := testPool.dispatch()
 	expected := &node{host: "localhost:9002", index: 1, pending: 1}
 	require.Equal(t, expected, actual)
 }
@@ -36,7 +36,7 @@ func TestLeastBusy_Complete(t *testing.T) {
 	}
 	heap.Init(&testPool.nodes)
 
-	testPool.Complete("localhost:9003")
+	testPool.complete("localhost:9003")
 	expected := nodes{
 		{host: "localhost:9002", index: 0, pending: 0},
 		{host: "localhost:9004", index: 1, pending: 1},

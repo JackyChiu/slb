@@ -2,32 +2,64 @@ package slb
 
 import (
 	"container/heap"
+	"net/http"
 	"strings"
 )
 
-type leastBusy struct {
-	nodes nodes
+type request struct {
 }
 
-func newLeastBusy(urls []string) leastBusy {
+type leastBusy struct {
+	nodes        nodes
+	dispatchChan chan chan node
+	completeChan chan *http.Response
+}
+
+func newLeastBusy(urls []string) *leastBusy {
 	nodes := newNodes(urls)
 	heap.Init(&nodes)
-	return leastBusy{
-		nodes: nodes,
+	lb := &leastBusy{
+		nodes:        nodes,
+		dispatchChan: make(chan chan node),
+		completeChan: make(chan *http.Response),
+	}
+	go lb.balance()
+	return lb
+}
+
+func (l *leastBusy) Dispatch() <-chan node {
+	nodeChan := make(chan node)
+	l.dispatchChan <- nodeChan
+	return nodeChan
+}
+
+func (l *leastBusy) Complete(res *http.Response) {
+	l.completeChan <- res
+}
+
+func (l *leastBusy) balance() {
+	for {
+		select {
+		case nodeChan := <-l.dispatchChan:
+			nodeChan <- l.dispatch()
+
+		case res := <-l.completeChan:
+			l.complete(res.Request.URL.Host)
+		}
 	}
 }
 
-func (p leastBusy) Dispatch() *node {
-	node := heap.Pop(&p.nodes).(*node)
+func (l *leastBusy) dispatch() node {
+	node := heap.Pop(&l.nodes).(*node)
 	node.pending += 1
-	heap.Push(&p.nodes, node)
-	heap.Fix(&p.nodes, node.index)
-	return node
+	heap.Push(&l.nodes, node)
+	heap.Fix(&l.nodes, node.index)
+	return *node
 }
 
-func (p leastBusy) Complete(host string) {
+func (l *leastBusy) complete(host string) {
 	var n *node
-	for _, node := range p.nodes {
+	for _, node := range l.nodes {
 		if strings.Compare(node.host, host) == 0 {
 			n = node
 			break
@@ -35,5 +67,9 @@ func (p leastBusy) Complete(host string) {
 	}
 
 	n.pending -= 1
-	heap.Fix(&p.nodes, n.index)
+	heap.Fix(&l.nodes, n.index)
+}
+
+func (l *leastBusy) String() string {
+	return l.nodes.String()
 }

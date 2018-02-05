@@ -7,19 +7,22 @@ import (
 )
 
 type Pool interface {
-	Node(host string) *node
-	Dispatch() *node
-	Complete()
+	Dispatch() <-chan node
+	Complete(res *http.Response)
+}
+
+func NewPool(hosts []string) Pool {
+	return newLeastBusy(hosts)
 }
 
 type Balancer struct {
 	*httputil.ReverseProxy
-	pool leastBusy
+	pool Pool
 }
 
 func NewBalancer(hosts []string) *Balancer {
 	b := &Balancer{
-		pool: newLeastBusy(hosts),
+		pool: NewPool(hosts),
 	}
 
 	b.ReverseProxy = &httputil.ReverseProxy{
@@ -31,7 +34,8 @@ func NewBalancer(hosts []string) *Balancer {
 }
 
 func (b *Balancer) Director(r *http.Request) {
-	node := b.pool.Dispatch()
+	nodeChan := b.pool.Dispatch()
+	node := <-nodeChan
 	log.Println(b.pool)
 
 	r.URL.Scheme = "http"
@@ -39,6 +43,6 @@ func (b *Balancer) Director(r *http.Request) {
 }
 
 func (b *Balancer) ModifyResponse(res *http.Response) error {
-	b.pool.Complete(res.Request.URL.Host)
+	b.pool.Complete(res)
 	return nil
 }
