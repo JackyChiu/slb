@@ -11,7 +11,8 @@ import (
 
 func main() {
 	var (
-		configPath = flag.String("c", "", "path to config file")
+		configPath = flag.String("config", "", "path to config file")
+		strategy   = flag.String("strategy", slb.RoundRobin, "strategy of the load balancer")
 	)
 	flag.Parse()
 
@@ -19,5 +20,5 @@ func main() {
 	port := fmt.Sprintf(":%v", config.Port)
 
 	log.Printf("balancing from port %v", port)
-	http.ListenAndServe(port, slb.NewBalancer(config.Hosts))
+	http.ListenAndServe(port, slb.NewBalancer(*strategy, config.Hosts))
 }

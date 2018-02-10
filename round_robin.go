@@ -23,6 +23,7 @@ func newRoundRobin(hosts []string) *roundRobin {
 	}
 	rr := &roundRobin{
 		ring:         r,
+		nodes:        nodes,
 		dispatchChan: make(chan chan node),
 		completeChan: make(chan *http.Response),
 	}

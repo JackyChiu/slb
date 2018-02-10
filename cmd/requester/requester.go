@@ -40,5 +40,5 @@ func randomPause() {
 }
 
 func randonDuration() int {
-	return rand.Intn(5) + 1
+	return rand.Intn(5) + 3
 }

@@ -4,6 +4,13 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+
+	"github.com/pkg/errors"
+)
+
+const (
+	LeastBusy  = "least_busy"
+	RoundRobin = "round_robin"
 )
 
 type Pool interface {
@@ -11,8 +18,15 @@ type Pool interface {
 	Complete(res *http.Response)
 }
 
-func NewPool(hosts []string) Pool {
-	return newLeastBusy(hosts)
+func NewPool(strategy string, hosts []string) Pool {
+	switch strategy {
+	case LeastBusy:
+		return newLeastBusy(hosts)
+	case RoundRobin:
+		return newRoundRobin(hosts)
+	default:
+		panic(errors.Errorf("%v is not a valid stratgey", strategy))
+	}
 }
 
 type Balancer struct {
@@ -20,9 +34,9 @@ type Balancer struct {
 	pool Pool
 }
 
-func NewBalancer(hosts []string) *Balancer {
+func NewBalancer(strategy string, hosts []string) *Balancer {
 	b := &Balancer{
-		pool: NewPool(hosts),
+		pool: NewPool(strategy, hosts),
 	}
 
 	b.ReverseProxy = &httputil.ReverseProxy{

@@ -17,7 +17,7 @@ func TestBalancer(t *testing.T) {
 	}))
 	defer testServer.Close()
 
-	balancer := NewBalancer([]string{testServer.URL[7:]}) // hack to get host and port
+	balancer := NewBalancer(LeastBusy, []string{testServer.URL[7:]}) // hack to get host and port
 	balancerServer := httptest.NewServer(balancer)
 
 	res, err := http.Post(balancerServer.URL, "application/json", nil)

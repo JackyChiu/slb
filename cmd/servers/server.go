@@ -15,7 +15,7 @@ import (
 
 func main() {
 	var (
-		configPath = flag.String("c", "", "path to config file")
+		configPath = flag.String("config", "", "path to config file")
 	)
 	flag.Parse()
 
