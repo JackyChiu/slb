@@ -17,7 +17,7 @@ bin/slb -strategy round_robin -config config.json
 
 ### Least Busy
 ```bash
-bin/slb -strategy round_robin -config config.json
+bin/slb -strategy least_busy -config config.json
 ```
 ![](.github/least_busy.gif)
 
