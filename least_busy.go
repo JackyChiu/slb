@@ -6,17 +6,14 @@ import (
 	"strings"
 )
 
-type request struct {
-}
-
 type leastBusy struct {
 	nodes        nodes
 	dispatchChan chan chan node
 	completeChan chan *http.Response
 }
 
-func newLeastBusy(urls []string) *leastBusy {
-	nodes := newNodes(urls)
+func newLeastBusy(hosts []string) *leastBusy {
+	nodes := newNodes(hosts)
 	heap.Init(&nodes)
 	lb := &leastBusy{
 		nodes:        nodes,
@@ -42,7 +39,6 @@ func (l *leastBusy) balance() {
 		select {
 		case nodeChan := <-l.dispatchChan:
 			nodeChan <- l.dispatch()
-
 		case res := <-l.completeChan:
 			l.complete(res.Request.URL.Host)
 		}

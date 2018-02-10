@@ -12,9 +12,9 @@ type node struct {
 	pending int
 }
 
-func newNode(url string, index int) *node {
+func newNode(host string, index int) *node {
 	return &node{
-		host:    url,
+		host:    host,
 		pending: 0,
 		index:   index,
 	}
@@ -22,9 +22,9 @@ func newNode(url string, index int) *node {
 
 type nodes []*node
 
-func newNodes(urls []string) nodes {
-	pool := make(nodes, len(urls))
-	for i, url := range urls {
+func newNodes(hosts []string) nodes {
+	pool := make(nodes, len(hosts))
+	for i, url := range hosts {
 		pool[i] = newNode(url, i)
 	}
 	return pool
