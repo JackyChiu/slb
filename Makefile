@@ -1,4 +1,4 @@
-all: install
+all: clean test install
 
 clean:
 	rm -rf bin
