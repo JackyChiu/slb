@@ -2,8 +2,6 @@ package slb
 
 import (
 	"container/heap"
-	"net/http"
-	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -26,7 +24,7 @@ func TestLeastBusy_Dispatch(t *testing.T) {
 	require.Equal(t, expected, actual)
 }
 
-func TestLeastBusy_Complete(t *testing.T) {
+func TestLeastBusy_complete(t *testing.T) {
 	testPool := newLeastBusy([]string{})
 	testPool.nodes = nodes{
 		{host: "localhost:9000", index: 0, pending: 7},
@@ -37,14 +35,7 @@ func TestLeastBusy_Complete(t *testing.T) {
 	}
 	heap.Init(&testPool.nodes)
 
-	res := &http.Response{
-		Request: &http.Request{
-			URL: &url.URL{
-				Host: "localhost:9003",
-			},
-		},
-	}
-	testPool.Complete(res)
+	testPool.complete("localhost:9003")
 	expected := nodes{
 		{host: "localhost:9002", index: 0, pending: 0},
 		{host: "localhost:9004", index: 1, pending: 1},

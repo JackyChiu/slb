@@ -1,4 +1,4 @@
-# Simple Load Balancer 
+# Simple Load Balancer [![CircleCI](https://circleci.com/gh/JackyChiu/slb.svg?style=svg)](https://circleci.com/gh/JackyChiu/slb)
 
 slb is a simple single node HTTP load balancer
 

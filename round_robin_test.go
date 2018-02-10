@@ -2,8 +2,6 @@ package slb
 
 import (
 	"container/ring"
-	"net/http"
-	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -32,7 +30,7 @@ func TestRoundRobin_Dispatch(t *testing.T) {
 	require.Equal(t, expected, actual)
 }
 
-func TestRoundRobin_Complete(t *testing.T) {
+func TestRoundRobin_complete(t *testing.T) {
 	testPool := newRoundRobin([]string{})
 	testNodes := nodes{
 		{host: "localhost:9000", index: 0, pending: 7},
@@ -49,14 +47,7 @@ func TestRoundRobin_Complete(t *testing.T) {
 		testPool.ring = testPool.ring.Next()
 	}
 
-	res := &http.Response{
-		Request: &http.Request{
-			URL: &url.URL{
-				Host: "localhost:9003",
-			},
-		},
-	}
-	testPool.Complete(res)
+	testPool.complete("localhost:9003")
 	expected := nodes{
 		{host: "localhost:9000", index: 0, pending: 7},
 		{host: "localhost:9002", index: 1, pending: 0},
