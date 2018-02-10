@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// roundRobin is strategy of scheduling that distributes work by providing
+// the same amount of work to all workers.
 type roundRobin struct {
 	ring         *ring.Ring
 	nodes        nodes

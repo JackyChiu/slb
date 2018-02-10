@@ -40,7 +40,7 @@ func main() {
 	wg.Wait()
 }
 
-// StartServer starts up a indiviual server running on specified port
+// StartServer starts up a indiviual server running on specified port.
 func StartServer(host, port string) {
 	server := http.Server{
 		Addr: port,
@@ -54,16 +54,17 @@ func StartServer(host, port string) {
 var maxSleep = 25 * time.Second
 
 type (
+	// sleepHandler simulates a route that does work by sleeping.
 	sleepHandler struct {
 		host string
 	}
 
+	// sleepRequest defines for long to sleep
 	sleepRequest struct {
 		Seconds int `json:"seconds"`
 	}
 )
 
-// sleepHandler simulates a route that does work by sleeping
 func (s *sleepHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var req sleepRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

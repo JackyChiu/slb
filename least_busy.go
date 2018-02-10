@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// leastBusy is a scheduling strategy that looks at the amount of work
+// that the workers have and schedules jobs to the least busy worker.
 type leastBusy struct {
 	nodes        nodes
 	dispatchChan chan chan node
