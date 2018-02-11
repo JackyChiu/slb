@@ -59,7 +59,7 @@ type (
 		host string
 	}
 
-	// sleepRequest defines for long to sleep
+	// sleepRequest defines for long to sleep.
 	sleepRequest struct {
 		Seconds int `json:"seconds"`
 	}
@@ -73,7 +73,7 @@ func (s *sleepHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	log.Printf("%v recieved a request to sleep for %v seconds", s.host, req.Seconds)
+	log.Printf("%v received a request to sleep for %v seconds", s.host, req.Seconds)
 	select {
 	case <-time.After(time.Duration(req.Seconds) * time.Second):
 	case <-time.After(maxSleep):

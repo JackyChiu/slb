@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Config models the configuations that is avaiable for the balancer.
+// Config models the configuations that is available for the balancer.
 type Config struct {
 	Port  int      `json:"port"`
 	Hosts []string `json:"hosts"`
