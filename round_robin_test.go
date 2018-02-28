@@ -24,8 +24,7 @@ func TestRoundRobin_Dispatch(t *testing.T) {
 		testPool.ring = testPool.ring.Next()
 	}
 
-	nodeChan := testPool.Dispatch()
-	actual := <-nodeChan
+	actual := testPool.Dispatch()
 	expected := node{host: "localhost:9000", index: 0, pending: 8}
 	require.Equal(t, expected, actual)
 }

@@ -17,7 +17,7 @@ const (
 // Pool is an interface for pools with different
 // strategies of distributing work.
 type Pool interface {
-	Dispatch() <-chan node
+	Dispatch() node
 	Complete(res *http.Response)
 }
 
@@ -56,8 +56,7 @@ func NewBalancer(strategy string, hosts []string) *Balancer {
 
 // Director directs the request to the node that was dispatched by pool.
 func (b *Balancer) Director(r *http.Request) {
-	nodeChan := b.pool.Dispatch()
-	node := <-nodeChan
+	node := b.pool.Dispatch()
 	log.Println(b.pool)
 
 	r.URL.Scheme = "http"

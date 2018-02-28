@@ -26,10 +26,10 @@ func newLeastBusy(hosts []string) *leastBusy {
 	return lb
 }
 
-func (l *leastBusy) Dispatch() <-chan node {
+func (l *leastBusy) Dispatch() node {
 	nodeChan := make(chan node)
 	l.dispatchChan <- nodeChan
-	return nodeChan
+	return <-nodeChan
 }
 
 func (l *leastBusy) Complete(res *http.Response) {

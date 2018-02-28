@@ -33,10 +33,10 @@ func newRoundRobin(hosts []string) *roundRobin {
 	return rr
 }
 
-func (rr *roundRobin) Dispatch() <-chan node {
+func (rr *roundRobin) Dispatch() node {
 	nodeChan := make(chan node)
 	rr.dispatchChan <- nodeChan
-	return nodeChan
+	return <-nodeChan
 }
 
 func (rr *roundRobin) Complete(res *http.Response) {

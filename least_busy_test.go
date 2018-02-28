@@ -18,8 +18,7 @@ func TestLeastBusy_Dispatch(t *testing.T) {
 	}
 	heap.Init(&testPool.nodes)
 
-	nodeChan := testPool.Dispatch()
-	actual := <-nodeChan
+	actual := testPool.Dispatch()
 	expected := node{host: "localhost:9002", index: 1, pending: 1}
 	require.Equal(t, expected, actual)
 }
